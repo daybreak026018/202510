@@ -75,68 +75,217 @@ class YOLOBasePanel(QWidget):
     def apply_theme(self):
         self.setStyleSheet(
             """
+            QWidget {
+                background-color: transparent;
+                color: #222222;
+                font-family: "Microsoft YaHei UI", "Segoe UI", "Microsoft YaHei";
+                font-size: 12px;
+            }
+
             QLabel#banner {
-                background-color: #eaf2ff;
-                border: 1px solid #c8daf1;
-                border-radius: 12px;
-                padding: 10px 14px;
-                color: #163153;
+                background-color: #f5f5f5;
+                border: 1px solid #cccccc;
+                border-radius: 0px;
+                padding: 9px 11px;
+                color: #444444;
             }
 
             QFrame#metricCard {
-                background-color: #f8fbff;
-                border: 1px solid #d7e4f3;
-                border-radius: 12px;
+                background-color: #ffffff;
+                border: 1px solid #cccccc;
+                border-radius: 0px;
             }
 
             QLabel#metricTitle {
-                color: #67809b;
-                font-size: 11px;
+                color: #666666;
+                font-size: 10px;
                 background-color: transparent;
             }
 
             QLabel#metricValue {
-                color: #163153;
-                font-size: 20px;
+                color: #222222;
+                font-size: 16px;
                 font-weight: bold;
                 background-color: transparent;
             }
 
             QGroupBox {
-                margin-top: 14px;
-                padding-top: 12px;
+                background-color: #ffffff;
+                border: 1px solid #cccccc;
+                border-radius: 0px;
+                margin-top: 10px;
+                padding: 14px 10px 10px 10px;
+                font-size: 12px;
+                font-weight: bold;
+                color: #333333;
+            }
+
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 12px;
+                padding: 0 7px;
+                background-color: #ffffff;
+                color: #333333;
             }
 
             QTabWidget::pane {
-                border: 1px solid #d7e4f3;
-                border-radius: 12px;
+                border: 1px solid #cccccc;
+                border-radius: 0px;
                 background-color: #ffffff;
                 top: -1px;
             }
 
             QTabBar::tab {
-                background-color: #f5f9ff;
-                border: 1px solid #d7e4f3;
+                background-color: #eeeeee;
+                border: 1px solid #cccccc;
                 border-bottom: none;
-                border-top-left-radius: 10px;
-                border-top-right-radius: 10px;
-                color: #617a95;
-                padding: 8px 14px;
-                margin-right: 3px;
+                border-top-left-radius: 0px;
+                border-top-right-radius: 0px;
+                color: #555555;
+                padding: 6px 11px;
+                margin-right: 2px;
             }
 
             QTabBar::tab:selected {
                 background-color: #ffffff;
-                color: #163153;
+                color: #222222;
                 font-weight: bold;
-                border-top: 2px solid #2f6fdb;
+                border-top: 2px solid #3f6fae;
             }
 
-            QLineEdit, QPlainTextEdit, QListWidget {
-                border: 1px solid #d7e4f3;
-                border-radius: 10px;
-                background-color: #fbfdff;
-                padding: 7px 9px;
+            QLineEdit,
+            QPlainTextEdit,
+            QListWidget,
+            QComboBox,
+            QSpinBox,
+            QDoubleSpinBox {
+                border: 1px solid #bdbdbd;
+                border-radius: 0px;
+                background-color: #ffffff;
+                padding: 5px 7px;
+                selection-background-color: #dbe5f2;
+                selection-color: #222222;
+            }
+
+            QLineEdit:focus,
+            QPlainTextEdit:focus,
+            QComboBox:focus,
+            QSpinBox:focus,
+            QDoubleSpinBox:focus {
+                border-color: #6d8fb8;
+            }
+
+            QComboBox::drop-down {
+                width: 26px;
+                border: none;
+            }
+
+            QComboBox QAbstractItemView {
+                background-color: #ffffff;
+                border: 1px solid #bdbdbd;
+                selection-background-color: #dbe5f2;
+                selection-color: #222222;
+            }
+
+            QPushButton {
+                min-height: 30px;
+                padding: 5px 12px;
+                border-radius: 0px;
+                border: 1px solid #aaaaaa;
+                background-color: #ffffff;
+                color: #222222;
+                font-weight: normal;
+            }
+
+            QPushButton:hover {
+                background-color: #eeeeee;
+                border-color: #777777;
+            }
+
+            QPushButton:pressed {
+                background-color: #dddddd;
+            }
+
+            QPushButton[buttonType="primary"],
+            QPushButton[buttonType="success"] {
+                background-color: #e3edf8;
+                border-color: #6d8fb8;
+                color: #244d7e;
+            }
+
+            QPushButton[buttonType="primary"]:hover,
+            QPushButton[buttonType="success"]:hover {
+                background-color: #d5e3f2;
+                border-color: #4e729e;
+            }
+
+            QPushButton[buttonType="primary"]:pressed,
+            QPushButton[buttonType="success"]:pressed {
+                background-color: #c6d8eb;
+            }
+
+            QPushButton[buttonType="warning"] {
+                background-color: #f7f0df;
+                border-color: #c6a85d;
+                color: #6b5421;
+            }
+
+            QPushButton[buttonType="danger"] {
+                background-color: #f8e3e3;
+                border-color: #c77a7a;
+                color: #7c2929;
+            }
+
+            QCheckBox {
+                spacing: 6px;
+                color: #444444;
+            }
+
+            QCheckBox::indicator {
+                width: 14px;
+                height: 14px;
+                border: 1px solid #999999;
+                border-radius: 0px;
+                background-color: #ffffff;
+            }
+
+            QCheckBox::indicator:checked {
+                background-color: #6d8fb8;
+                border-color: #5d7fa8;
+            }
+
+            QScrollBar:vertical {
+                background-color: #eeeeee;
+                width: 10px;
+                border-radius: 0px;
+            }
+
+            QScrollBar::handle:vertical {
+                background-color: #bdbdbd;
+                border-radius: 0px;
+                min-height: 24px;
+            }
+
+            QScrollBar::add-line:vertical,
+            QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+
+            QScrollBar:horizontal {
+                background-color: #eeeeee;
+                height: 10px;
+                border-radius: 0px;
+            }
+
+            QScrollBar::handle:horizontal {
+                background-color: #bdbdbd;
+                border-radius: 0px;
+                min-width: 24px;
+            }
+
+            QScrollBar::add-line:horizontal,
+            QScrollBar::sub-line:horizontal {
+                width: 0px;
             }
             """
         )
@@ -168,7 +317,10 @@ class YOLOBasePanel(QWidget):
         saved = settings.value("default_output_dir", "")
         if saved:
             return Path(saved)
-        return Path.cwd() / "runs"
+        return Path(__file__).resolve().parents[3] / "runs"
+
+    def _workspace_root(self) -> Path:
+        return Path(__file__).resolve().parents[3]
 
 
 class ImagePreviewList(QListWidget):
@@ -1081,7 +1233,7 @@ class YOLOTrainingPanel(YOLOProcessPanel):
             python_executable=self._selected_python(),
         )
         self._set_curve_preview(None)
-        self._start_process(YOLOCommandBuilder.build_train(cfg), Path.cwd())
+        self._start_process(YOLOCommandBuilder.build_train(cfg), self._workspace_root())
 
     def _finished(self, exit_code, exit_status):
         super()._finished(exit_code, exit_status)
@@ -1236,7 +1388,7 @@ class YOLOPredictPanel(YOLOProcessPanel):
             python_executable=self._selected_python(),
         )
         self.preview_list.set_images([])
-        self._start_process(YOLOCommandBuilder.build_predict(cfg), Path.cwd())
+        self._start_process(YOLOCommandBuilder.build_predict(cfg), self._workspace_root())
 
     def _finished(self, exit_code, exit_status):
         super()._finished(exit_code, exit_status)

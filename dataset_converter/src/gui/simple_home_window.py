@@ -1,5 +1,5 @@
 """
-Responsive blue-and-white main window shell for DataForge YOLO Studio.
+Product-style blue workspace shell for DataForge YOLO Studio.
 """
 
 from pathlib import Path
@@ -22,7 +22,7 @@ from .theme_manager import theme_manager
 
 
 class NavCard(QFrame):
-    """Clickable navigation card used in the rebuilt sidebar."""
+    """Compact product navigation item."""
 
     clicked = pyqtSignal(int)
 
@@ -32,21 +32,21 @@ class NavCard(QFrame):
         self.setObjectName("navCard")
         self.setProperty("selected", "false")
         self.setCursor(QCursor(Qt.PointingHandCursor))
-        self.setFixedHeight(64)
+        self.setFixedHeight(44)
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 8, 12, 8)
-        layout.setSpacing(2)
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(8, 4, 10, 4)
+        layout.setSpacing(8)
+
+        self.index_label = QLabel(f"{index + 1:02d}")
+        self.index_label.setObjectName("navIndex")
+        self.index_label.setAlignment(Qt.AlignCenter)
+        self.index_label.setFixedSize(24, 24)
 
         self.title_label = QLabel(title)
         self.title_label.setObjectName("navTitle")
-
-        self.subtitle_label = QLabel(subtitle)
-        self.subtitle_label.setObjectName("navSubtitle")
-        self.subtitle_label.setWordWrap(True)
-
-        layout.addWidget(self.title_label)
-        layout.addWidget(self.subtitle_label)
+        layout.addWidget(self.index_label)
+        layout.addWidget(self.title_label, 1)
 
     def set_selected(self, selected: bool):
         self.setProperty("selected", "true" if selected else "false")
@@ -60,16 +60,16 @@ class NavCard(QFrame):
 
 
 class SimpleHomeWindow(QMainWindow):
-    """Single-palette blue shell around the tool panels."""
+    """White workspace card with a compact blue product navigation."""
 
     NAV_ITEMS = [
-        ("总览", "查看环境、最近训练、最近检测和输出目录"),
-        ("数据准备", "数据集准备、转换、划分与完整性检查"),
-        ("环境检测", "Python、PyTorch、CUDA 和 Conda 环境管理"),
-        ("模型训练", "选择 YOLO 版本并启动训练"),
-        ("模型检测", "选择权重并进行推理检测"),
-        ("结果管理", "集中查看 runs、权重和结果预览"),
-        ("设置", "修改默认输出目录和基础偏好"),
+        ("总览", "环境与任务概览"),
+        ("数据准备", "检查、转换与划分"),
+        ("环境检测", "Python、Conda 与 GPU"),
+        ("模型训练", "配置并启动训练"),
+        ("模型检测", "权重推理与预览"),
+        ("结果管理", "曲线、结果与权重"),
+        ("设置", "输出目录与偏好"),
     ]
 
     def __init__(self):
@@ -105,40 +105,50 @@ class SimpleHomeWindow(QMainWindow):
         AppStyles.HEADER_BG = colors["header_bg"]
         AppStyles.HEADER_TEXT = colors["header_text"]
 
+    def _icon_path(self) -> Path:
+        icon_root = Path(__file__).resolve().parents[3] / "assets"
+        for name in ("logo.ico", "logo.png"):
+            candidate = icon_root / name
+            if candidate.exists():
+                return candidate
+        return Path(__file__).parent.parent.parent / "resources" / "icon.png"
+
     def _build_ui(self):
         self.setWindowTitle("DataForge YOLO Studio")
-        self.setMinimumSize(720, 480)
-        self.resize(920, 560)
+        self.setMinimumSize(760, 520)
+        self.resize(980, 620)
 
-        icon_root = Path(__file__).resolve().parents[3] / "assets"
-        icon_path = icon_root / "logo.ico"
-        if not icon_path.exists():
-            icon_path = icon_root / "logo.png"
-        if not icon_path.exists():
-            icon_path = Path(__file__).parent.parent.parent / "resources" / "icon.png"
+        icon_path = self._icon_path()
         if icon_path.exists():
             self.setWindowIcon(QIcon(str(icon_path)))
 
         root = QWidget()
-        root.setObjectName("shellRoot")
+        root.setObjectName("workspaceRoot")
         self.setCentralWidget(root)
 
-        root_layout = QHBoxLayout(root)
-        root_layout.setContentsMargins(0, 0, 0, 0)
+        root_layout = QVBoxLayout(root)
+        root_layout.setContentsMargins(8, 8, 8, 8)
         root_layout.setSpacing(0)
+
+        self.workspace_card = QFrame()
+        self.workspace_card.setObjectName("workspaceCard")
+        shell_layout = QHBoxLayout(self.workspace_card)
+        shell_layout.setContentsMargins(0, 0, 0, 0)
+        shell_layout.setSpacing(0)
+        root_layout.addWidget(self.workspace_card, 1)
 
         self.sidebar = QFrame()
         self.sidebar.setObjectName("sidebar")
         self.sidebar.setFixedWidth(190)
-        self.sidebar_layout = QVBoxLayout(self.sidebar)
-        self.sidebar_layout.setContentsMargins(14, 18, 14, 14)
-        self.sidebar_layout.setSpacing(10)
+        sidebar_layout = QVBoxLayout(self.sidebar)
+        sidebar_layout.setContentsMargins(8, 8, 8, 8)
+        sidebar_layout.setSpacing(4)
 
         nav_container = QWidget()
         nav_container.setObjectName("navContainer")
         self.nav_layout = QVBoxLayout(nav_container)
         self.nav_layout.setContentsMargins(0, 0, 0, 0)
-        self.nav_layout.setSpacing(8)
+        self.nav_layout.setSpacing(0)
 
         for index, (title, subtitle) in enumerate(self.NAV_ITEMS):
             card = NavCard(index, title, subtitle, self)
@@ -153,35 +163,49 @@ class SimpleHomeWindow(QMainWindow):
         self.nav_scroll.setFrameShape(QFrame.NoFrame)
         self.nav_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.nav_scroll.setWidget(nav_container)
-        self.sidebar_layout.addWidget(self.nav_scroll, 1)
-        root_layout.addWidget(self.sidebar)
+        sidebar_layout.addWidget(self.nav_scroll, 1)
+
+        footer = QLabel("LOCAL WORKSPACE\n本机训练与检测")
+        footer.setObjectName("sidebarFooter")
+        sidebar_layout.addWidget(footer)
+        footer.hide()
+        shell_layout.addWidget(self.sidebar)
 
         self.content_wrap = QFrame()
         self.content_wrap.setObjectName("contentWrap")
-        self.content_layout = QVBoxLayout(self.content_wrap)
-        self.content_layout.setContentsMargins(18, 18, 18, 18)
-        self.content_layout.setSpacing(12)
+        content_layout = QVBoxLayout(self.content_wrap)
+        content_layout.setContentsMargins(14, 12, 14, 12)
+        content_layout.setSpacing(10)
+        shell_layout.addWidget(self.content_wrap, 1)
 
         self.header_card = QFrame()
         self.header_card.setObjectName("headerCard")
-        self.header_layout = QVBoxLayout(self.header_card)
-        self.header_layout.setContentsMargins(18, 14, 18, 14)
-        self.header_layout.setSpacing(4)
+        header_layout = QHBoxLayout(self.header_card)
+        header_layout.setContentsMargins(2, 0, 2, 0)
+        header_layout.setSpacing(12)
 
+        title_layout = QVBoxLayout()
+        title_layout.setContentsMargins(0, 0, 0, 0)
+        title_layout.setSpacing(3)
         self.page_title = QLabel("总览")
         self.page_title.setObjectName("pageTitle")
         self.page_desc = QLabel("查看环境、训练、检测与输出结果的整体状态")
         self.page_desc.setObjectName("pageDesc")
-        self.page_desc.setWordWrap(True)
-        self.header_layout.addWidget(self.page_title)
-        self.header_layout.addWidget(self.page_desc)
-        self.content_layout.addWidget(self.header_card)
+        title_layout.addWidget(self.page_title)
+        title_layout.addWidget(self.page_desc)
+        header_layout.addLayout(title_layout, 1)
+
+        self.workspace_badge = QLabel("本地工作区")
+        self.workspace_badge.setObjectName("workspaceBadge")
+        self.workspace_badge.setAlignment(Qt.AlignCenter)
+        header_layout.addWidget(self.workspace_badge, 0, Qt.AlignTop)
+        content_layout.addWidget(self.header_card)
 
         self.stack_card = QFrame()
         self.stack_card.setObjectName("stackCard")
-        self.stack_layout = QVBoxLayout(self.stack_card)
-        self.stack_layout.setContentsMargins(14, 14, 14, 14)
-        self.stack_layout.setSpacing(0)
+        stack_layout = QVBoxLayout(self.stack_card)
+        stack_layout.setContentsMargins(8, 8, 8, 8)
+        stack_layout.setSpacing(0)
 
         self.stack_scroll = QScrollArea()
         self.stack_scroll.setObjectName("contentScroll")
@@ -192,10 +216,8 @@ class SimpleHomeWindow(QMainWindow):
         self.stack = QStackedWidget()
         self.stack.setObjectName("contentStack")
         self.stack_scroll.setWidget(self.stack)
-        self.stack_layout.addWidget(self.stack_scroll)
-
-        self.content_layout.addWidget(self.stack_card, 1)
-        root_layout.addWidget(self.content_wrap, 1)
+        stack_layout.addWidget(self.stack_scroll)
+        content_layout.addWidget(self.stack_card, 1)
 
     def _build_panels(self):
         from .yolo_panels import (
@@ -209,7 +231,7 @@ class SimpleHomeWindow(QMainWindow):
         )
 
         self.panel_classes = [
-            YOLOHomePanel(self),
+            YOLOHomePanel,
             YOLODataPanel,
             YOLOEnvironmentPanel,
             YOLOTrainingPanel,
@@ -219,7 +241,7 @@ class SimpleHomeWindow(QMainWindow):
         ]
         self.panels = [None] * len(self.panel_classes)
         self.panel_placeholders = []
-        for index, _panel_class in enumerate(self.panel_classes):
+        for index in range(len(self.panel_classes)):
             placeholder = self._create_panel_placeholder(index)
             self.panel_placeholders.append(placeholder)
             self.stack.addWidget(placeholder)
@@ -237,7 +259,6 @@ class SimpleHomeWindow(QMainWindow):
         desc_label = QLabel(f"{subtitle}\n页面正在初始化，请稍候。")
         desc_label.setObjectName("placeholderDesc")
         desc_label.setWordWrap(True)
-
         layout.addStretch()
         layout.addWidget(title_label, 0, Qt.AlignHCenter)
         layout.addWidget(desc_label, 0, Qt.AlignHCenter)
@@ -249,11 +270,7 @@ class SimpleHomeWindow(QMainWindow):
         if panel is not None:
             return panel
 
-        panel_class = self.panel_classes[index]
-        if index == 0:
-            panel = panel_class
-        else:
-            panel = panel_class(self)
+        panel = self.panel_classes[index](self)
         if hasattr(panel, "apply_theme"):
             panel.apply_theme()
 
@@ -292,107 +309,171 @@ class SimpleHomeWindow(QMainWindow):
             current_panel.refresh()
 
     def _apply_shell_style(self):
-        blue_base = theme_manager.generate_stylesheet("light")
         shell_style = """
-        QWidget#shellRoot {
-            background-color: #f3f8ff;
+        QWidget#workspaceRoot {
+            background-color: #eeeeee;
+        }
+
+        QFrame#workspaceCard {
+            background-color: #ffffff;
+            border: 1px solid #bdbdbd;
+            border-radius: 0px;
         }
 
         QFrame#sidebar {
-            background-color: #fbfdff;
-            border-right: 1px solid #d5e2f2;
+            background-color: #f3f3f3;
+            border: none;
+            border-right: 1px solid #c8c8c8;
         }
 
-        QFrame#headerCard,
-        QFrame#stackCard {
-            background-color: #ffffff;
-            border: 1px solid #d5e2f2;
-            border-radius: 12px;
+        QFrame#brandBlock {
+            background-color: transparent;
+            border: none;
+            border-radius: 0px;
         }
 
-        QLabel#pageDesc {
-            color: #60758f;
-            font-size: 11px;
+        QLabel#brandLogo {
+            background-color: transparent;
+            border-radius: 0px;
+        }
+
+        QLabel#brandTitle {
+            color: #202020;
+            font-size: 14px;
+            font-weight: bold;
             background-color: transparent;
         }
 
-        QLabel#pageTitle {
-            color: #163153;
-            font-size: 18px;
-            font-weight: 700;
-            background-color: transparent;
-        }
-
-        QFrame#navCard {
-            background-color: #ffffff;
-            border: 1px solid #dce7f4;
-            border-radius: 12px;
-        }
-
-        QFrame#navCard:hover {
-            background-color: #f2f7ff;
-            border-color: #b6cae7;
-        }
-
-        QFrame#navCard[selected="true"] {
-            background-color: #e6f0ff;
-            border: 1px solid #9fbee8;
-            border-left: 3px solid #2f6fdb;
-        }
-
-        QFrame#navCard QLabel#navTitle {
-            color: #163153;
-            font-size: 12px;
-            font-weight: 700;
-            background-color: transparent;
-        }
-
-        QFrame#navCard QLabel#navSubtitle {
-            color: #6d829c;
+        QLabel#brandSubtitle {
+            color: #666666;
             font-size: 10px;
             background-color: transparent;
         }
 
-        QStackedWidget#contentStack {
+        QLabel#sectionLabel {
+            color: #666666;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 5px 8px 2px 8px;
+            background-color: transparent;
+        }
+
+        QFrame#navCard {
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid #dddddd;
+            border-radius: 0px;
+        }
+
+        QFrame#navCard:hover {
+            background-color: #e6e6e6;
+        }
+
+        QFrame#navCard[selected="true"] {
+            background-color: #dce8f8;
+            border-left: 3px solid #3f6fae;
+        }
+
+        QFrame#navCard QLabel#navIndex {
+            color: #666666;
+            background-color: transparent;
+            border-radius: 0px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        QFrame#navCard[selected="true"] QLabel#navIndex {
+            color: #315f99;
+            background-color: transparent;
+        }
+
+        QFrame#navCard QLabel#navTitle {
+            color: #222222;
+            font-size: 12px;
+            font-weight: bold;
+            background-color: transparent;
+        }
+
+        QFrame#navCard QLabel#navSubtitle {
+            color: #777777;
+            font-size: 9px;
+            background-color: transparent;
+        }
+
+        QLabel#sidebarFooter {
+            color: #777777;
+            font-size: 9px;
+            padding: 8px;
+            background-color: transparent;
+        }
+
+        QFrame#contentWrap {
+            background-color: transparent;
+        }
+
+        QFrame#headerCard {
             background-color: transparent;
             border: none;
         }
 
-        QScrollArea#contentScroll {
+        QLabel#pageTitle {
+            color: #222222;
+            font-size: 18px;
+            font-weight: bold;
             background-color: transparent;
-            border: none;
         }
 
+        QLabel#pageDesc {
+            color: #666666;
+            font-size: 11px;
+            background-color: transparent;
+        }
+
+        QLabel#workspaceBadge {
+            color: #555555;
+            background-color: #eeeeee;
+            border: 1px solid #cccccc;
+            border-radius: 0px;
+            padding: 5px 8px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        QFrame#stackCard {
+            background-color: #ffffff;
+            border: 1px solid #c8c8c8;
+            border-radius: 0px;
+        }
+
+        QStackedWidget#contentStack,
+        QScrollArea#contentScroll,
         QScrollArea#navScroll {
             background-color: transparent;
             border: none;
         }
 
-        QWidget#navContainer {
-            background-color: transparent;
-        }
-
+        QWidget#navContainer,
         QScrollArea#contentScroll > QWidget > QWidget {
             background-color: transparent;
         }
 
         QFrame#panelPlaceholder {
             background-color: #ffffff;
-            border: 1px dashed #c8d8eb;
-            border-radius: 14px;
+            border: 1px solid #cccccc;
+            border-radius: 0px;
         }
 
         QLabel#placeholderTitle {
-            color: #163153;
-            font-size: 18px;
-            font-weight: 700;
+            color: #222222;
+            font-size: 16px;
+            font-weight: bold;
             background-color: transparent;
         }
 
         QLabel#placeholderDesc {
-            color: #6d829c;
+            color: #666666;
             font-size: 11px;
             background-color: transparent;
         }
         """
-        self.setStyleSheet(blue_base + shell_style)
+        self.setStyleSheet(theme_manager.generate_stylesheet("light") + shell_style)

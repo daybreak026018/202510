@@ -486,10 +486,10 @@ class YOLOCommandBuilder:
     @staticmethod
     def build_train(config: YOLOTrainConfig) -> List[str]:
         data_arg = config.data_yaml if config.task == "classify" else config.data_yaml
+        runner_path = Path(__file__).resolve().parent / "yolo_cli_runner.py"
         args = [
             config.python_executable or sys.executable,
-            "-m",
-            "dataset_converter.src.core.yolo_cli_runner",
+            str(runner_path),
             "train",
             "--task",
             config.task,
@@ -520,10 +520,10 @@ class YOLOCommandBuilder:
 
     @staticmethod
     def build_predict(config: YOLOPredictConfig) -> List[str]:
+        runner_path = Path(__file__).resolve().parent / "yolo_cli_runner.py"
         args = [
             config.python_executable or sys.executable,
-            "-m",
-            "dataset_converter.src.core.yolo_cli_runner",
+            str(runner_path),
             "predict",
             "--task",
             config.task,
